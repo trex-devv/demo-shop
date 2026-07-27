@@ -25,8 +25,8 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const user = process.env.ADMIN_WEBSITE_URL;
-const admin = process.env.USER_WEBSITE_URL;
+const admin = process.env.ADMIN_WEBSITE_URL;
+const user = process.env.USER_WEBSITE_URL;
 
 // Middleware
 app.use(
