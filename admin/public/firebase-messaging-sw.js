@@ -14,36 +14,27 @@ firebase.initializeApp({
   appId: "1:343143623091:web:0b258f4982a2e45d6b83c6",
 });
 
-const messaging = firebase.messaging();
+self.addEventListener("push", (event) => {
+  const payload = event.data ? event.data.json() : {};
 
-messaging.onBackgroundMessage((payload) => {
-  console.log("Background Message:", payload);
+  const title =
+    payload.notification?.title || payload.data?.title || "Notification";
 
-  self.registration.showNotification(
-    payload.notification?.title || "Notification",
-    {
-      body: payload.notification?.body || "",
-      icon: "/logo.png",
-      data: payload.data,
-    },
-  );
+  const options = {
+    body: payload.notification?.body || payload.data?.body || "",
+    icon: "/logo.png",
+    badge: "/logo.png",
+    data: payload.data || {},
+    requireInteraction: true,
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener("push", (event) => {
-  let data = {};
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
 
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch {
-    data = {};
-  }
+  const url = event.notification.data?.url || "/";
 
-  console.log("RAW PUSH:", data);
-
-  event.waitUntil(
-    self.registration.showNotification("RAW PUSH RECEIVED", {
-      body: JSON.stringify(data),
-      icon: "/logo.png",
-    }),
-  );
+  event.waitUntil(clients.openWindow(url));
 });
