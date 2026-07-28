@@ -30,6 +30,8 @@ const __dirname = path.dirname(__filename);
 const admin = process.env.ADMIN_WEBSITE_URL;
 const user = process.env.USER_WEBSITE_URL;
 
+const router = express.Router();
+
 // Middleware
 app.use(
   cors({
