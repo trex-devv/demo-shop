@@ -5,7 +5,7 @@ import { ArrowRight, Star, Zap } from "lucide-react";
 const FeaturedProducts = ({ products, currency }) => {
   if (!products || products.length === 0) return null;
 
-  const featuredProducts = products.slice(0, 8);
+  const featuredProducts = products.slice(0, 12);
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-white">
@@ -20,8 +20,8 @@ const FeaturedProducts = ({ products, currency }) => {
               Popular in-game items and subscriptions
             </p>
           </div>
-          <Link 
-            to="/collection" 
+          <Link
+            to="/collection"
             className="group inline-flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
           >
             View All
@@ -32,19 +32,27 @@ const FeaturedProducts = ({ products, currency }) => {
         {/* Products Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {featuredProducts.map((product) => {
-            const hasVariants = product.pricingType === "variants" && product.variants?.length > 0;
-            
+            const hasVariants =
+              product.pricingType === "variants" &&
+              product.variants?.length > 0;
+
             // Get display price
             let displayPrice = `${currency}${product.price}`;
             if (hasVariants) {
-              const prices = product.variants.map(v => v.price);
+              const prices = product.variants.map((v) => v.price);
               const min = Math.min(...prices);
               const max = Math.max(...prices);
-              displayPrice = min === max ? `${currency}${min}` : `${currency}${min} - ${currency}${max}`;
+              displayPrice =
+                min === max
+                  ? `${currency}${min}`
+                  : `${currency}${min} - ${currency}${max}`;
             }
 
             // Check if product is new or popular
-            const isNew = product.createdAt && new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            const isNew =
+              product.createdAt &&
+              new Date(product.createdAt) >
+                new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
             const isPopular = product.rating && product.rating >= 4.5;
 
             return (

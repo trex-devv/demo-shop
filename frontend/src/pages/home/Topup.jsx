@@ -3,15 +3,22 @@ import { ShopContext } from "../../contexts/ShopContext";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { 
-  Search, X, ShoppingCart, 
-  Loader2, Gamepad2, Star, ChevronRight, AlertCircle
+import {
+  Search,
+  X,
+  ShoppingCart,
+  Loader2,
+  Gamepad2,
+  Star,
+  ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 import DeliveryDetailsModal from "../../components/DeliveryDetailsModal.jsx";
 
 const TopUp = () => {
   const navigate = useNavigate();
-  const { backendUrl, currency, addToCart, products, token, user } = useContext(ShopContext);
+  const { backendUrl, currency, addToCart, products, token, user } =
+    useContext(ShopContext);
   const [topUpProducts, setTopUpProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,10 +37,11 @@ const TopUp = () => {
 
   useEffect(() => {
     if (products.length > 0) {
-      const topUps = products.filter(p => 
-        p.category?.name?.toLowerCase().includes('topup') ||
-        p.category?.name?.toLowerCase().includes('top-up') ||
-        p.category?.slug?.includes('topup')
+      const topUps = products.filter(
+        (p) =>
+          p.category?.name?.toLowerCase().includes("topup") ||
+          p.category?.name?.toLowerCase().includes("top-up") ||
+          p.category?.slug?.includes("topup"),
       );
       setTopUpProducts(topUps.length > 0 ? topUps : products);
       setLoading(false);
@@ -50,8 +58,8 @@ const TopUp = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const fetchCategories = async () => {
@@ -60,8 +68,7 @@ const TopUp = () => {
       if (response.data.success) {
         setCategories(response.data.categories || []);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleAddToCart = (product) => {
@@ -74,7 +81,7 @@ const TopUp = () => {
       toast.error("This product is out of stock");
       return;
     }
-    
+
     // Show delivery details modal instead of directly adding to cart
     setSelectedProduct(product);
     setShowDeliveryModal(true);
@@ -82,20 +89,22 @@ const TopUp = () => {
 
   const handleDeliveryConfirm = async (deliveryDetails) => {
     setAddingToCart(selectedProduct?._id);
-    
-    const variantLabel = selectedProduct.pricingType === "variants" && selectedProduct.variants?.length > 0 
-      ? selectedProduct.variants[0].label 
-      : null;
-    
+
+    const variantLabel =
+      selectedProduct.pricingType === "variants" &&
+      selectedProduct.variants?.length > 0
+        ? selectedProduct.variants[0].label
+        : null;
+
     const result = await addToCart(
       selectedProduct._id,
       variantLabel,
       1,
       deliveryDetails,
       selectedProduct.category?._id,
-      selectedProduct.category?.slug
+      selectedProduct.category?.slug,
     );
-    
+
     if (result.success) {
       setShowDeliveryModal(false);
       setSelectedProduct(null);
@@ -107,16 +116,21 @@ const TopUp = () => {
     if (product.pricingType === "flat") {
       return `${currency}${product.price}`;
     } else {
-      const prices = product.variants?.map(v => v.price) || [];
+      const prices = product.variants?.map((v) => v.price) || [];
       if (prices.length === 0) return `${currency}0`;
       const min = Math.min(...prices);
       const max = Math.max(...prices);
-      return min === max ? `${currency}${min}` : `${currency}${min} - ${currency}${max}`;
+      return min === max
+        ? `${currency}${min}`
+        : `${currency}${min} - ${currency}${max}`;
     }
   };
 
-  const filteredProducts = topUpProducts.filter(product => {
-    if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+  const filteredProducts = topUpProducts.filter((product) => {
+    if (
+      searchTerm &&
+      !product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
       return false;
     }
     if (selectedGame !== "all" && product.category?._id !== selectedGame) {
@@ -125,7 +139,7 @@ const TopUp = () => {
     return true;
   });
 
-  const quickGames = categories.slice(0, 6);
+  const quickGames = categories.reverse().slice(0, 3);
 
   // Skeleton Loader Component
   const SkeletonCard = () => (
@@ -146,7 +160,10 @@ const TopUp = () => {
         <div className="bg-gray-200 rounded-2xl h-40 sm:h-48 mb-6 sm:mb-10 animate-pulse" />
         <div className="flex gap-2 mb-4 sm:mb-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-8 w-16 bg-gray-200 rounded-full animate-pulse" />
+            <div
+              key={i}
+              className="h-8 w-16 bg-gray-200 rounded-full animate-pulse"
+            />
           ))}
         </div>
         <div className="h-12 bg-gray-200 rounded-xl mb-4 sm:mb-6 animate-pulse" />
@@ -169,7 +186,8 @@ const TopUp = () => {
               Instant TopUps
             </h1>
             <p className="text-sm sm:text-base text-gray-400 max-w-xl mx-auto px-2">
-              Browse in-game items for different games and services instantly. PUBG, Free Fire, Mobile Legends & more.
+              Browse in-game items for different games and services instantly.{" "}
+              {quickGames.map((cat) => cat.name).join(", ")} & more.
             </p>
           </div>
         </div>
@@ -178,7 +196,7 @@ const TopUp = () => {
         <div ref={stickyTriggerRef} className="h-0.5" />
 
         {/* Quick Games */}
-        {quickGames.length > 0 && (
+        {categories.length > 0 && (
           <div className="flex overflow-x-auto gap-1.5 sm:gap-2 mb-4 sm:mb-6 pb-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             <button
               onClick={() => setSelectedGame("all")}
@@ -190,7 +208,7 @@ const TopUp = () => {
             >
               All
             </button>
-            {quickGames.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat._id}
                 onClick={() => setSelectedGame(cat._id)}
@@ -207,27 +225,32 @@ const TopUp = () => {
         )}
 
         {/* Search Bar - Smooth Sticky */}
-        <div 
+        <div
           ref={searchRef}
           className={`transition-all duration-500 ease-in-out ${
-            isSearchSticky 
-              ? 'fixed top-16 left-0 right-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200/50' 
-              : ''
+            isSearchSticky
+              ? "fixed top-16 left-0 right-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200/50"
+              : ""
           }`}
         >
-          <div className={`${isSearchSticky ? 'px-3 sm:px-4 md:px-6 py-2.5' : 'px-0'}`}>
-            <div className={`${isSearchSticky ? 'max-w-6xl mx-auto' : ''}`}>
+          <div
+            className={`${isSearchSticky ? "px-3 sm:px-4 md:px-6 py-2.5" : "px-0"}`}
+          >
+            <div className={`${isSearchSticky ? "max-w-6xl mx-auto" : ""}`}>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
                 <input
                   type="text"
                   placeholder="Search games and services"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className={`w-full pl-10 pr-9 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white transition-all duration-300 ${
-                    isSearchSticky 
-                      ? 'py-2.5 text-sm sm:text-base' 
-                      : 'py-3 sm:py-3.5 text-base sm:text-lg'
+                    isSearchSticky
+                      ? "py-2.5 text-sm sm:text-base"
+                      : "py-3 sm:py-3.5 text-base sm:text-lg"
                   }`}
                 />
                 {searchTerm && (
@@ -247,7 +270,9 @@ const TopUp = () => {
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12 sm:py-16 bg-white rounded-2xl border border-gray-200 mt-4">
             <Gamepad2 className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm sm:text-base">No product found</p>
+            <p className="text-gray-500 text-sm sm:text-base">
+              No product found
+            </p>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
@@ -260,23 +285,27 @@ const TopUp = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mt-4">
             {filteredProducts.map((product) => {
-              const hasVariants = product.pricingType === "variants" && product.variants?.length > 0;
+              const hasVariants =
+                product.pricingType === "variants" &&
+                product.variants?.length > 0;
               const isAdding = addingToCart === product._id;
               const imageUrl = product.images?.[0]?.secure_url;
               const isOutOfStock = !product.inStock;
 
               return (
-                <div 
-                  key={product._id} 
+                <div
+                  key={product._id}
                   className={`bg-white border rounded-xl overflow-hidden transition group ${
-                    isOutOfStock ? 'border-red-200 opacity-60' : 'border-gray-200 hover:shadow-md'
+                    isOutOfStock
+                      ? "border-red-200 opacity-60"
+                      : "border-gray-200 hover:shadow-md"
                   }`}
                 >
                   <Link to={`/product/${product._id}`} className="block">
                     <div className="relative aspect-square bg-gray-50 overflow-hidden">
                       {imageUrl ? (
-                        <img 
-                          src={imageUrl} 
+                        <img
+                          src={imageUrl}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                           loading="lazy"
@@ -313,7 +342,9 @@ const TopUp = () => {
                         {product.name}
                       </h4>
                       {product.category && (
-                        <p className="text-xs sm:text-sm text-gray-400 truncate">{product.category.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-400 truncate">
+                          {product.category.name}
+                        </p>
                       )}
                     </Link>
 
@@ -338,12 +369,12 @@ const TopUp = () => {
                       disabled={isAdding || isOutOfStock}
                       className={`mt-2.5 sm:mt-3 w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-medium rounded-lg transition ${
                         isOutOfStock
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                           : isAdding
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : hasVariants
-                              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                              : 'bg-gray-900 text-white hover:bg-gray-800'
+                              ? "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                              : "bg-gray-900 text-white hover:bg-gray-800"
                       }`}
                     >
                       {isAdding ? (

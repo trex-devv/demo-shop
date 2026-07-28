@@ -20,17 +20,18 @@ import {
   Clock,
   XCircle,
   AlertCircle,
-  MessageCircle
+  MessageCircle,
 } from "lucide-react";
 
 const Profile = () => {
-  const { backendUrl, token, user, setUser, currency } = useContext(ShopContext);
+  const { backendUrl, token, user, setUser, currency } =
+    useContext(ShopContext);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    phone: ""
+    phone: "",
   });
   const [orders, setOrders] = useState([]);
   const [tickets, setTickets] = useState([]);
@@ -53,30 +54,32 @@ const Profile = () => {
       setLoading(true);
 
       const profileRes = await axios.get(`${backendUrl}/api/auth/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (profileRes.data.success) {
         setUser(profileRes.data.user);
         setFormData({
           name: profileRes.data.user.name || "",
-          phone: profileRes.data.user.phone || ""
+          phone: profileRes.data.user.phone || "",
         });
       }
 
       const ordersRes = await axios.get(`${backendUrl}/api/order/my-orders`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (ordersRes.data.success) {
         setOrders(ordersRes.data.orders || []);
       }
 
-      const ticketsRes = await axios.get(`${backendUrl}/api/ticket/my-tickets`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const ticketsRes = await axios.get(
+        `${backendUrl}/api/ticket/my-tickets`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (ticketsRes.data.success) {
         setTickets(ticketsRes.data.tickets || []);
       }
-
     } catch (error) {
       toast.error("Failed to load profile details");
     } finally {
@@ -88,7 +91,7 @@ const Profile = () => {
     if (isEditing) {
       setFormData({
         name: user?.name || "",
-        phone: user?.phone || ""
+        phone: user?.phone || "",
       });
       setIsEditing(false);
     } else {
@@ -102,7 +105,7 @@ const Profile = () => {
       const response = await axios.put(
         `${backendUrl}/api/auth/profile`,
         formData,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (response.data.success) {
         setUser({ ...user, ...formData });
@@ -119,7 +122,7 @@ const Profile = () => {
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -144,7 +147,7 @@ const Profile = () => {
       return new Date(date).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
-        year: "numeric"
+        year: "numeric",
       });
     } catch {
       return "N/A";
@@ -159,7 +162,7 @@ const Profile = () => {
         day: "numeric",
         year: "numeric",
         hour: "2-digit",
-        minute: "2-digit"
+        minute: "2-digit",
       });
     } catch {
       return "N/A";
@@ -168,28 +171,80 @@ const Profile = () => {
 
   const getStatusBadge = (status) => {
     const configs = {
-      "Delivered": { icon: CheckCircle, color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
-      "Payment Verified": { icon: CheckCircle, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
-      "Pending Verification": { icon: Clock, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
-      "Payment Rejected": { icon: XCircle, color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" },
-      "Cancelled": { icon: XCircle, color: "text-gray-600", bg: "bg-gray-100", border: "border-gray-200" },
-      "Open": { icon: AlertCircle, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
-      "Hold": { icon: Clock, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200" },
-      "Resolved": { icon: CheckCircle, color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
-      "Rejected": { icon: XCircle, color: "text-rose-700", bg: "bg-rose-50", border: "border-rose-200" }
+      Delivered: {
+        icon: CheckCircle,
+        color: "text-emerald-700",
+        bg: "bg-emerald-50",
+        border: "border-emerald-200",
+      },
+      "Payment Verified": {
+        icon: CheckCircle,
+        color: "text-blue-700",
+        bg: "bg-blue-50",
+        border: "border-blue-200",
+      },
+      "Pending Verification": {
+        icon: Clock,
+        color: "text-amber-700",
+        bg: "bg-amber-50",
+        border: "border-amber-200",
+      },
+      "Payment Rejected": {
+        icon: XCircle,
+        color: "text-rose-700",
+        bg: "bg-rose-50",
+        border: "border-rose-200",
+      },
+      Cancelled: {
+        icon: XCircle,
+        color: "text-gray-600",
+        bg: "bg-gray-100",
+        border: "border-gray-200",
+      },
+      Open: {
+        icon: AlertCircle,
+        color: "text-amber-700",
+        bg: "bg-amber-50",
+        border: "border-amber-200",
+      },
+      Hold: {
+        icon: Clock,
+        color: "text-blue-700",
+        bg: "bg-blue-50",
+        border: "border-blue-200",
+      },
+      Resolved: {
+        icon: CheckCircle,
+        color: "text-emerald-700",
+        bg: "bg-emerald-50",
+        border: "border-emerald-200",
+      },
+      Rejected: {
+        icon: XCircle,
+        color: "text-rose-700",
+        bg: "bg-rose-50",
+        border: "border-rose-200",
+      },
     };
-    return configs[status] || { icon: AlertCircle, color: "text-gray-700", bg: "bg-gray-100", border: "border-gray-200" };
+    return (
+      configs[status] || {
+        icon: AlertCircle,
+        color: "text-gray-700",
+        bg: "bg-gray-100",
+        border: "border-gray-200",
+      }
+    );
   };
 
   const tabs = [
     { id: "profile", label: "Profile", icon: User },
     { id: "orders", label: "Orders", icon: Package },
-    { id: "tickets", label: "Tickets", icon: Ticket }
+    { id: "tickets", label: "Tickets", icon: Ticket },
   ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] bg-gray-50">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
           <Loader2 className="w-5 h-5 animate-spin text-gray-900" />
           <span>Loading...</span>
@@ -201,7 +256,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
-        
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
@@ -227,7 +281,12 @@ const Profile = () => {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-              const count = tab.id === "orders" ? orders.length : tab.id === "tickets" ? tickets.length : 0;
+              const count =
+                tab.id === "orders"
+                  ? orders.length
+                  : tab.id === "tickets"
+                    ? tickets.length
+                    : 0;
               return (
                 <button
                   key={tab.id}
@@ -241,9 +300,13 @@ const Profile = () => {
                   <Icon className="w-4 h-4" />
                   <span>{tab.label}</span>
                   {count > 0 && (
-                    <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${
-                      isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"
-                    }`}>
+                    <span
+                      className={`ml-1 text-xs px-2 py-0.5 rounded-full ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
                       {count}
                     </span>
                   )}
@@ -255,14 +318,17 @@ const Profile = () => {
 
         {/* Tab Contents */}
         <div className="bg-white border border-t-0 border-gray-200 rounded-b-xl p-4 sm:p-6">
-          
           {/* Profile Tab */}
           {activeTab === "profile" && (
             <div>
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-gray-200">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">Update your account details</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Personal Information
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Update your account details
+                  </p>
                 </div>
                 <div>
                   {isEditing ? (
@@ -278,7 +344,11 @@ const Profile = () => {
                         disabled={saving}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
                       >
-                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {saving ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Save className="w-4 h-4" />
+                        )}
                         Save Changes
                       </button>
                     </div>
@@ -299,7 +369,9 @@ const Profile = () => {
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 mb-2">
                     <User className="w-4 h-4 text-gray-400" />
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</label>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Full Name
+                    </label>
                   </div>
                   {isEditing ? (
                     <input
@@ -311,7 +383,9 @@ const Profile = () => {
                       placeholder="Enter your name"
                     />
                   ) : (
-                    <p className="text-base font-medium text-gray-900">{user?.name || "Not set"}</p>
+                    <p className="text-base font-medium text-gray-900">
+                      {user?.name || "Not set"}
+                    </p>
                   )}
                 </div>
 
@@ -319,16 +393,22 @@ const Profile = () => {
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Mail className="w-4 h-4 text-gray-400" />
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email Address</label>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email Address
+                    </label>
                   </div>
-                  <p className="text-base font-medium text-gray-900">{user?.email || "Not set"}</p>
+                  <p className="text-base font-medium text-gray-900">
+                    {user?.email || "Not set"}
+                  </p>
                 </div>
 
                 {/* Phone */}
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Phone className="w-4 h-4 text-gray-400" />
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</label>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Phone Number
+                    </label>
                   </div>
                   {isEditing ? (
                     <input
@@ -340,7 +420,9 @@ const Profile = () => {
                       placeholder="Enter your phone number"
                     />
                   ) : (
-                    <p className="text-base font-medium text-gray-900">{user?.phone || "Not set"}</p>
+                    <p className="text-base font-medium text-gray-900">
+                      {user?.phone || "Not set"}
+                    </p>
                   )}
                 </div>
 
@@ -348,9 +430,13 @@ const Profile = () => {
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Calendar className="w-4 h-4 text-gray-400" />
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Member Since</label>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Member Since
+                    </label>
                   </div>
-                  <p className="text-base font-medium text-gray-900">{formatDate(user?.createdAt)}</p>
+                  <p className="text-base font-medium text-gray-900">
+                    {formatDate(user?.createdAt)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -361,12 +447,16 @@ const Profile = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Order History</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">Track your top-up purchases</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Order History
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Track your top-up purchases
+                  </p>
                 </div>
                 {orders.length > 0 && (
-                  <Link 
-                    to="/orders" 
+                  <Link
+                    to="/orders"
                     className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     View All
@@ -379,7 +469,10 @@ const Profile = () => {
                 <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
                   <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-sm text-gray-500">No orders yet</p>
-                  <Link to="/collection" className="text-sm text-gray-900 hover:underline mt-2 inline-block">
+                  <Link
+                    to="/collection"
+                    className="text-sm text-gray-900 hover:underline mt-2 inline-block"
+                  >
                     Start Shopping →
                   </Link>
                 </div>
@@ -389,8 +482,8 @@ const Profile = () => {
                     const statusConfig = getStatusBadge(order.status);
                     const StatusIcon = statusConfig.icon;
                     return (
-                      <div 
-                        key={order._id} 
+                      <div
+                        key={order._id}
                         className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200"
                       >
                         <div className="space-y-1.5 mb-2 sm:mb-0">
@@ -398,7 +491,9 @@ const Profile = () => {
                             <span className="text-sm font-semibold text-gray-900">
                               #{order.orderNumber || order._id.slice(-8)}
                             </span>
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full ${statusConfig.bg} ${statusConfig.color} border ${statusConfig.border}`}>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full ${statusConfig.bg} ${statusConfig.color} border ${statusConfig.border}`}
+                            >
                               <StatusIcon className="w-3 h-3" />
                               {order.status}
                             </span>
@@ -411,7 +506,8 @@ const Profile = () => {
                         </div>
                         <div className="text-left sm:text-right">
                           <span className="text-base font-bold text-gray-900">
-                            {currency}{order.amount?.toFixed(2)}
+                            {currency}
+                            {order.amount?.toFixed(2)}
                           </span>
                         </div>
                       </div>
@@ -427,8 +523,12 @@ const Profile = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Support Tickets</h2>
-                  <p className="text-sm text-gray-500 mt-0.5">View your support inquiries</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Support Tickets
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    View your support inquiries
+                  </p>
                 </div>
               </div>
 
@@ -453,7 +553,9 @@ const Profile = () => {
                             <span className="text-sm font-semibold text-gray-900">
                               {ticket.type}
                             </span>
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full ${statusConfig.bg} ${statusConfig.color} border ${statusConfig.border}`}>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full ${statusConfig.bg} ${statusConfig.color} border ${statusConfig.border}`}
+                            >
                               <StatusIcon className="w-3 h-3" />
                               {ticket.status}
                             </span>
@@ -490,7 +592,9 @@ const Profile = () => {
                 <div className="p-2 bg-gray-100 rounded-lg">
                   <MessageCircle className="w-4 h-4 text-gray-700" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">Ticket Details</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Ticket Details
+                </h3>
               </div>
               <button
                 onClick={closeTicketModal}
@@ -505,31 +609,46 @@ const Profile = () => {
               {/* Ticket Info Grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Ticket ID</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+                    Ticket ID
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 mt-0.5">
                     #{selectedTicket._id.slice(-8)}
                   </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Order Number</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+                    Order Number
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 mt-0.5">
                     #{selectedTicket.orderNumber}
                   </p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Status</p>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full mt-0.5 ${getStatusBadge(selectedTicket.status).bg} ${getStatusBadge(selectedTicket.status).color} border ${getStatusBadge(selectedTicket.status).border}`}>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+                    Status
+                  </p>
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full mt-0.5 ${getStatusBadge(selectedTicket.status).bg} ${getStatusBadge(selectedTicket.status).color} border ${getStatusBadge(selectedTicket.status).border}`}
+                  >
                     {selectedTicket.status}
                   </span>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Priority</p>
-                  <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full mt-0.5 ${
-                    selectedTicket.priority === "Urgent" ? "bg-rose-50 text-rose-700 border border-rose-200" :
-                    selectedTicket.priority === "High" ? "bg-orange-50 text-orange-700 border border-orange-200" :
-                    selectedTicket.priority === "Medium" ? "bg-blue-50 text-blue-700 border border-blue-200" :
-                    "bg-gray-100 text-gray-700 border border-gray-200"
-                  }`}>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+                    Priority
+                  </p>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full mt-0.5 ${
+                      selectedTicket.priority === "Urgent"
+                        ? "bg-rose-50 text-rose-700 border border-rose-200"
+                        : selectedTicket.priority === "High"
+                          ? "bg-orange-50 text-orange-700 border border-orange-200"
+                          : selectedTicket.priority === "Medium"
+                            ? "bg-blue-50 text-blue-700 border border-blue-200"
+                            : "bg-gray-100 text-gray-700 border border-gray-200"
+                    }`}
+                  >
                     {selectedTicket.priority}
                   </span>
                 </div>
@@ -537,13 +656,19 @@ const Profile = () => {
 
               {/* Issue Type */}
               <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Issue Type</p>
-                <p className="text-sm font-medium text-gray-900">{selectedTicket.type}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                  Issue Type
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  {selectedTicket.type}
+                </p>
               </div>
 
               {/* Description */}
               <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Description</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                  Description
+                </p>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {selectedTicket.description || "No description provided"}
                 </p>
@@ -552,7 +677,9 @@ const Profile = () => {
               {/* Admin Note */}
               {selectedTicket.adminNote && (
                 <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <p className="text-xs text-blue-600 uppercase tracking-wider mb-1">Support Note</p>
+                  <p className="text-xs text-blue-600 uppercase tracking-wider mb-1">
+                    Support Note
+                  </p>
                   <p className="text-sm text-blue-900 leading-relaxed">
                     {selectedTicket.adminNote}
                   </p>
@@ -562,13 +689,21 @@ const Profile = () => {
               {/* Timestamps */}
               <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Created</p>
-                  <p className="text-sm font-medium text-gray-900 mt-0.5">{formatDateTime(selectedTicket.createdAt)}</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">
+                    Created
+                  </p>
+                  <p className="text-sm font-medium text-gray-900 mt-0.5">
+                    {formatDateTime(selectedTicket.createdAt)}
+                  </p>
                 </div>
                 {selectedTicket.resolvedAt && (
                   <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider">Resolved</p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">{formatDateTime(selectedTicket.resolvedAt)}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider">
+                      Resolved
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 mt-0.5">
+                      {formatDateTime(selectedTicket.resolvedAt)}
+                    </p>
                   </div>
                 )}
               </div>

@@ -44,11 +44,14 @@ const Home = () => {
 
       // Filter products
       if (products.length > 0) {
-        const inStockProducts = products.filter(p => p.inStock !== false);
-        const featured = inStockProducts.filter(p => p.isFeatured === true);
-        setFeaturedProducts(featured.length > 0 ? featured.slice(0, 8) : inStockProducts.slice(0, 8));
-      }
+        const inStockProducts = products.filter((p) => p.inStock !== false);
 
+        const randProducts = [...inStockProducts].sort(
+          () => Math.random() - 0.5,
+        );
+
+        setFeaturedProducts(randProducts);
+      }
     } catch (error) {
       console.error("Error fetching home data:", error);
       setError("Failed to load data. Please try again.");
@@ -88,7 +91,10 @@ const Home = () => {
       <Category categories={categories} />
       <FeaturedProducts products={featuredProducts} currency={currency} />
       {subscriptions.length > 0 && (
-        <FeaturedSubscriptions subscriptions={subscriptions} currency={currency} />
+        <FeaturedSubscriptions
+          subscriptions={subscriptions}
+          currency={currency}
+        />
       )}
       <WhyChooseUs />
     </div>
