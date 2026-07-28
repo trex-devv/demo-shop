@@ -70,7 +70,7 @@ app.use("/api/dev", devRoutes);
 app.get("/test-notification", async (req, res) => {
   const doc = await adminTokenModel.findOne();
 
-  await sendFCMNotification([doc.fcmToken], "TEst", "Hello notification");
+  await sendFCMNotification(doc.fcmToken, "TEst", "Hello notification");
 
   res.json({ success: true, message: "SENTT" });
 });
