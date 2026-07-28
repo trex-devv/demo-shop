@@ -58,17 +58,17 @@ export const saveAdminFCMToken = async (req, res) => {
 
     if (!doc) {
       doc = new adminTokenModel({
-        fcmTokens: [token],
+        fcmToken: [token],
       });
     } else {
       // Remove duplicate if it already exists
-      doc.fcmTokens = doc.fcmTokens.filter((t) => t !== token);
+      doc.fcmToken = doc.fcmToken.filter((t) => t !== token);
 
       // Add newest token to the front
-      doc.fcmTokens.unshift(token);
+      doc.fcmToken.unshift(token);
 
       // Keep only latest 3
-      doc.fcmTokens = doc.fcmTokens.slice(0, 3);
+      doc.fcmToken = doc.fcmToken.slice(0, 3);
 
       doc.updatedAt = new Date();
     }
