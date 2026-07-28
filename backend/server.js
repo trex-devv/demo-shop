@@ -30,8 +30,6 @@ const __dirname = path.dirname(__filename);
 const admin = process.env.ADMIN_WEBSITE_URL;
 const user = process.env.USER_WEBSITE_URL;
 
-const router = express.Router();
-
 // Middleware
 app.use(
   cors({
@@ -69,7 +67,7 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/fields", fieldRoutes);
 app.use("/api/dev", devRoutes);
 
-router.get("/test-notification", async (req, res) => {
+app.get("/test-notification", async (req, res) => {
   const doc = await adminTokenModel.findOne();
 
   await sendFCMNotification([doc.fcmToken[0]], "TEst", "Hello notification");
