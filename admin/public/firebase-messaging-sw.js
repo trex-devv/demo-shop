@@ -28,3 +28,22 @@ messaging.onBackgroundMessage((payload) => {
     },
   );
 });
+
+self.addEventListener("push", (event) => {
+  let data = {};
+
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = {};
+  }
+
+  console.log("RAW PUSH:", data);
+
+  event.waitUntil(
+    self.registration.showNotification("RAW PUSH RECEIVED", {
+      body: JSON.stringify(data),
+      icon: "/logo.png",
+    }),
+  );
+});

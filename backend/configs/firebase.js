@@ -34,7 +34,25 @@ export const sendFCMNotification = async (
         body,
       },
       data: {
+        title,
+        body,
         url: clickUrl,
+      },
+      webpush: {
+        headers: {
+          Urgency: "high",
+          TTL: "3600",
+        },
+        notification: {
+          title,
+          body,
+          icon: "/logo.png",
+          badge: "/logo.png",
+          requireInteraction: true,
+        },
+        fcmOptions: {
+          link: clickUrl,
+        },
       },
     };
 
@@ -61,7 +79,7 @@ export const sendFCMNotification = async (
         {},
         {
           $pull: {
-            fcmTokens: { $in: invalidTokens },
+            fcmToken: { $in: invalidTokens },
           },
         },
       );
