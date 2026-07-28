@@ -19,6 +19,8 @@ import ticketRoutes from "./routes/ticketRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoute.js";
 import adminRoutes from "./routes/adminRoute.js";
 import devRoutes from "./routes/devRoutes.js";
+import adminTokenModel from "./models/adminTokenModel.js";
+import { sendFCMNotification } from "./configs/firebase.js";
 
 dotenv.config();
 const app = express();
@@ -65,6 +67,14 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/fields", fieldRoutes);
 app.use("/api/dev", devRoutes);
 
+router.get("test-notification", async (req, res) => {
+  const doc = await adminTokenModel.findOne();
+
+  await sendFCMNotification([doc.fcmToken[0]], "TEst", "Hello notification");
+
+  res.json({ success: true, message: "SENTT" });
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
@@ -81,7 +91,7 @@ app.use((err, req, res, next) => {
 
 // Database connection
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/gaming-store")
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB");
     const PORT = process.env.PORT || 5000;

@@ -1,16 +1,17 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const adminTokenSchema = new mongoose.Schema({
   fcmToken: {
-    type: String,
-    required: true
+    type: [String],
+    default: [],
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-const adminTokenModel = mongoose.models.adminToken || mongoose.model('adminToken', adminTokenSchema);
+const adminTokenModel =
+  mongoose.models.adminToken || mongoose.model("adminToken", adminTokenSchema);
 
 export default adminTokenModel;

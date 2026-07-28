@@ -1,22 +1,22 @@
-import ticketModel from '../models/ticketModel.js';
-import orderModel from '../models/orderModel.js';
-import cloudinary from '../configs/cloudinary.js';
-import { sendFCMNotification } from '../configs/firebase.js';
-import adminTokenModel from '../models/adminTokenModel.js';
+import ticketModel from "../models/ticketModel.js";
+import orderModel from "../models/orderModel.js";
+import cloudinary from "../configs/cloudinary.js";
+import { sendFCMNotification } from "../configs/firebase.js";
+import adminTokenModel from "../models/adminTokenModel.js";
 
 // Get priority based on ticket type
 const getPriority = (type) => {
   const priorities = {
-    'Item Not Delivered': 'Urgent',
-    'Wrong Item Received': 'High',
-    'Missing Items': 'High',
-    'Delayed Delivery': 'Medium',
-    'Wrong Details Submitted': 'Medium',
-    'Items Not Received In-Game': 'Urgent',
-    'Payment Not Verified': 'High',
-    'Other': 'Low'
+    "Item Not Delivered": "Urgent",
+    "Wrong Item Received": "High",
+    "Missing Items": "High",
+    "Delayed Delivery": "Medium",
+    "Wrong Details Submitted": "Medium",
+    "Items Not Received In-Game": "Urgent",
+    "Payment Not Verified": "High",
+    Other: "Low",
   };
-  return priorities[type] || 'Medium';
+  return priorities[type] || "Medium";
 };
 
 // Create ticket (User)
@@ -29,42 +29,42 @@ export const createTicket = async (req, res) => {
     if (!orderId) {
       return res.status(400).json({
         success: false,
-        message: 'Order ID is required'
+        message: "Order ID is required",
       });
     }
 
     if (!type) {
       return res.status(400).json({
         success: false,
-        message: 'Ticket type is required'
+        message: "Ticket type is required",
       });
     }
 
     if (!description) {
       return res.status(400).json({
         success: false,
-        message: 'Description is required'
+        message: "Description is required",
       });
     }
 
     // Validate order exists and belongs to user
     const order = await orderModel.findOne({ _id: orderId, userId });
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Order not found or does not belong to you' 
+      return res.status(404).json({
+        success: false,
+        message: "Order not found or does not belong to you",
       });
     }
 
     // Check if user already has 3 tickets for this order
-    const ticketCount = await ticketModel.countDocuments({ 
-      order: orderId
+    const ticketCount = await ticketModel.countDocuments({
+      order: orderId,
     });
 
     if (ticketCount >= 3) {
       return res.status(400).json({
         success: false,
-        message: `You can only raise up to 3 tickets per order. You already have ${ticketCount} ticket(s).`
+        message: `You can only raise up to 3 tickets per order. You already have ${ticketCount} ticket(s).`,
       });
     }
 
@@ -72,21 +72,21 @@ export const createTicket = async (req, res) => {
     let uploadedAttachments = [];
     if (attachments && attachments.length > 0) {
       for (const attachment of attachments) {
-        if (attachment.startsWith('data:image')) {
+        if (attachment.startsWith("data:image")) {
           try {
             const result = await cloudinary.uploader.upload(attachment, {
-              folder: 'gaming-store/tickets',
+              folder: "gaming-store/tickets",
               transformation: [
-                { width: 800, height: 800, crop: 'limit', quality: 'auto' }
-              ]
+                { width: 800, height: 800, crop: "limit", quality: "auto" },
+              ],
             });
             uploadedAttachments.push({
               url: result.secure_url,
               public_id: result.public_id,
-              filename: attachment.name || 'attachment'
+              filename: attachment.name || "attachment",
             });
           } catch (uploadError) {
-            console.error('Cloudinary upload error:', uploadError);
+            console.error("Cloudinary upload error:", uploadError);
           }
         }
       }
@@ -103,7 +103,7 @@ export const createTicket = async (req, res) => {
       description: description,
       attachments: uploadedAttachments,
       priority: priority,
-      status: 'Open'
+      status: "Open",
     });
 
     await ticket.save();
@@ -111,31 +111,42 @@ export const createTicket = async (req, res) => {
     // Trigger FCM Notification
     try {
       const adminTokenDoc = await adminTokenModel.findOne({});
-      
-      if (adminTokenDoc && adminTokenDoc.fcmToken) {
-        await sendFCMNotification(
+
+      if (
+        adminTokenDoc &&
+        adminTokenDoc.fcmToken &&
+        adminTokenDoc.fcmToken.length > 0
+      ) {
+        const result = await sendFCMNotification(
           adminTokenDoc.fcmToken,
           "New Support Ticket Raised!",
-          `Type: ${type} (Order #${ticket.orderNumber})`
+          `Type: ${type} (Order #${ticket.orderNumber})`,
         );
+
+        console.log("Ticket Notification result:", result);
       } else {
-        console.log("Skipping ticket notification: No active admin token saved in database.");
+        console.log(
+          "Skipping ticket notification: No active admin token saved in database.",
+        );
       }
     } catch (notificationError) {
-      console.error("Failed to send ticket push notification:", notificationError);
+      console.error(
+        "Failed to send ticket push notification:",
+        notificationError,
+      );
     }
 
     res.status(201).json({
       success: true,
-      message: 'Ticket created successfully',
+      message: "Ticket created successfully",
       ticket,
-      remainingTickets: 3 - (ticketCount + 1)
+      remainingTickets: 3 - (ticketCount + 1),
     });
   } catch (error) {
-    console.error('Create ticket error:', error);
-    res.status(400).json({ 
-      success: false, 
-      message: error.message || 'Failed to create ticket'
+    console.error("Create ticket error:", error);
+    res.status(400).json({
+      success: false,
+      message: error.message || "Failed to create ticket",
     });
   }
 };
@@ -150,8 +161,9 @@ export const getUserTickets = async (req, res) => {
     const filter = { user: userId };
     if (status) filter.status = status;
 
-    const tickets = await ticketModel.find(filter)
-      .populate('order', 'amount status')
+    const tickets = await ticketModel
+      .find(filter)
+      .populate("order", "amount status")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -163,13 +175,13 @@ export const getUserTickets = async (req, res) => {
       tickets,
       total,
       page: parseInt(page),
-      totalPages: Math.ceil(total / parseInt(limit))
+      totalPages: Math.ceil(total / parseInt(limit)),
     });
   } catch (error) {
-    console.error('Get user tickets error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to fetch tickets'
+    console.error("Get user tickets error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch tickets",
     });
   }
 };
@@ -180,25 +192,26 @@ export const getTicketById = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const ticket = await ticketModel.findOne({ _id: id, user: userId })
-      .populate('order', 'amount status');
+    const ticket = await ticketModel
+      .findOne({ _id: id, user: userId })
+      .populate("order", "amount status");
 
     if (!ticket) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Ticket not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
       });
     }
 
     res.json({
       success: true,
-      ticket
+      ticket,
     });
   } catch (error) {
-    console.error('Get ticket error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to fetch ticket'
+    console.error("Get ticket error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch ticket",
     });
   }
 };
@@ -216,15 +229,16 @@ export const getAllTickets = async (req, res) => {
     if (priority) filter.priority = priority;
     if (search) {
       filter.$or = [
-        { orderNumber: { $regex: search, $options: 'i' } },
-        { type: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { orderNumber: { $regex: search, $options: "i" } },
+        { type: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
       ];
     }
 
-    const tickets = await ticketModel.find(filter)
-      .populate('user', 'name email')
-      .populate('order', 'amount status')
+    const tickets = await ticketModel
+      .find(filter)
+      .populate("user", "name email")
+      .populate("order", "amount status")
       .sort({ priority: 1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -236,13 +250,13 @@ export const getAllTickets = async (req, res) => {
       tickets,
       total,
       page: parseInt(page),
-      totalPages: Math.ceil(total / parseInt(limit))
+      totalPages: Math.ceil(total / parseInt(limit)),
     });
   } catch (error) {
-    console.error('Get all tickets error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to fetch tickets'
+    console.error("Get all tickets error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch tickets",
     });
   }
 };
@@ -252,33 +266,36 @@ export const getTicketForAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ticket = await ticketModel.findById(id)
-      .populate('user', 'name email')
-      .populate('order', 'amount status');
+    const ticket = await ticketModel
+      .findById(id)
+      .populate("user", "name email")
+      .populate("order", "amount status");
 
     if (!ticket) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Ticket not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
       });
     }
 
     // Get all tickets for the same order to show history
-    const orderTickets = await ticketModel.find({ 
-      order: ticket.order,
-      _id: { $ne: id }
-    }).sort({ createdAt: -1 });
+    const orderTickets = await ticketModel
+      .find({
+        order: ticket.order,
+        _id: { $ne: id },
+      })
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
       ticket,
-      orderTickets
+      orderTickets,
     });
   } catch (error) {
-    console.error('Get ticket for admin error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to fetch ticket'
+    console.error("Get ticket for admin error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch ticket",
     });
   }
 };
@@ -292,31 +309,32 @@ export const updateTicketStatus = async (req, res) => {
     if (!status) {
       return res.status(400).json({
         success: false,
-        message: 'Status is required'
+        message: "Status is required",
       });
     }
 
-    const validStatuses = ['Open', 'Hold', 'Resolved', 'Rejected'];
+    const validStatuses = ["Open", "Hold", "Resolved", "Rejected"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status. Must be one of: Open, Hold, Resolved, Rejected'
+        message:
+          "Invalid status. Must be one of: Open, Hold, Resolved, Rejected",
       });
     }
 
     const ticket = await ticketModel.findById(id);
     if (!ticket) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Ticket not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
       });
     }
 
     // Build update data
     const updateData = { status };
-    
+
     // Set resolvedAt when status changes to Resolved or Rejected
-    if (status === 'Resolved' || status === 'Rejected') {
+    if (status === "Resolved" || status === "Rejected") {
       updateData.resolvedAt = new Date();
     } else {
       // If reopening (Open or Hold), clear resolvedAt
@@ -325,26 +343,24 @@ export const updateTicketStatus = async (req, res) => {
 
     // Add admin note if provided
     if (adminNote !== undefined && adminNote !== null) {
-      updateData.adminNote = adminNote.trim() || '';
+      updateData.adminNote = adminNote.trim() || "";
     }
 
-    const updatedTicket = await ticketModel.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate('user', 'name email')
-      .populate('order', 'amount status');
+    const updatedTicket = await ticketModel
+      .findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
+      .populate("user", "name email")
+      .populate("order", "amount status");
 
     res.json({
       success: true,
       message: `Ticket ${status.toLowerCase()} successfully`,
-      ticket: updatedTicket
+      ticket: updatedTicket,
     });
   } catch (error) {
-    console.error('Update ticket status error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to update ticket status'
+    console.error("Update ticket status error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update ticket status",
     });
   }
 };
@@ -353,13 +369,13 @@ export const updateTicketStatus = async (req, res) => {
 export const getTicketStats = async (req, res) => {
   try {
     const total = await ticketModel.countDocuments();
-    const open = await ticketModel.countDocuments({ status: 'Open' });
-    const hold = await ticketModel.countDocuments({ status: 'Hold' });
-    const resolved = await ticketModel.countDocuments({ status: 'Resolved' });
-    const rejected = await ticketModel.countDocuments({ status: 'Rejected' });
-    const urgent = await ticketModel.countDocuments({ 
-      priority: 'Urgent', 
-      status: { $in: ['Open', 'Hold'] }
+    const open = await ticketModel.countDocuments({ status: "Open" });
+    const hold = await ticketModel.countDocuments({ status: "Hold" });
+    const resolved = await ticketModel.countDocuments({ status: "Resolved" });
+    const rejected = await ticketModel.countDocuments({ status: "Rejected" });
+    const urgent = await ticketModel.countDocuments({
+      priority: "Urgent",
+      status: { $in: ["Open", "Hold"] },
     });
 
     res.json({
@@ -370,14 +386,14 @@ export const getTicketStats = async (req, res) => {
         hold,
         resolved,
         rejected,
-        urgent
-      }
+        urgent,
+      },
     });
   } catch (error) {
-    console.error('Get ticket stats error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to fetch stats'
+    console.error("Get ticket stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch stats",
     });
   }
 };
@@ -387,20 +403,21 @@ export const getTicketsByOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    const tickets = await ticketModel.find({ order: orderId })
-      .populate('user', 'name email')
+    const tickets = await ticketModel
+      .find({ order: orderId })
+      .populate("user", "name email")
       .sort({ createdAt: -1 });
 
     res.json({
       success: true,
       tickets,
-      count: tickets.length
+      count: tickets.length,
     });
   } catch (error) {
-    console.error('Get tickets by order error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || 'Failed to fetch tickets'
+    console.error("Get tickets by order error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch tickets",
     });
   }
 };
