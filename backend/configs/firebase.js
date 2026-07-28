@@ -67,6 +67,8 @@ export const sendFCMNotification = async (
       );
     }
 
+    console.log(JSON.stringify(response, null, 2));
+
     return {
       success: true,
       response,
