@@ -12,15 +12,3 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const messaging = getMessaging(app);
-
-if ('serviceWorker' in navigator) {
-  const swUrl = `/firebase-messaging-sw.js?apiKey=${encodeURIComponent(firebaseConfig.apiKey)}&authDomain=${encodeURIComponent(firebaseConfig.authDomain)}&projectId=${encodeURIComponent(firebaseConfig.projectId)}&storageBucket=${encodeURIComponent(firebaseConfig.storageBucket)}&messagingSenderId=${encodeURIComponent(firebaseConfig.messagingSenderId)}&appId=${encodeURIComponent(firebaseConfig.appId)}`;
-
-  navigator.serviceWorker.register(swUrl)
-    .then((registration) => {
-      console.log('Notification Worker registered!');
-    })
-    .catch((err) => {
-      console.error('Notification Worker failed:', err);
-    });
-}
