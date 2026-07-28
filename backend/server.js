@@ -69,7 +69,7 @@ app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/fields", fieldRoutes);
 app.use("/api/dev", devRoutes);
 
-router.get("test-notification", async (req, res) => {
+router.get("/test-notification", async (req, res) => {
   const doc = await adminTokenModel.findOne();
 
   await sendFCMNotification([doc.fcmToken[0]], "TEst", "Hello notification");
