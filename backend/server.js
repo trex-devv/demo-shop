@@ -31,7 +31,7 @@ const user = process.env.USER_WEBSITE_URL;
 // Middleware
 app.use(
   cors({
-    origin: [user, admin],
+    origin: ["*", user, admin],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
